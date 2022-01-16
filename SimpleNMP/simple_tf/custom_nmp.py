@@ -36,42 +36,108 @@ class SISO_nmp(Env):
         self.D = np.array([0])
 
         # State matrix:
-        self.x0 = 0
-        self.x1 = 1
-
-        # Time steps:
-        self.step = 0.05
-
-        # No. of time steps
+        self.x = np.array([0, 1])
+        self.step_size = 0.05
         self.time = 25
-        self.nsteps = self.time / self.step
-        self.t = np.arange(0, self.time, self.step)
+        self.n = int(self.time / self.step_size)
 
-        # State matrix
-        self.x = np.zeros([self.nsteps, 2])
+        # Counter to count the no. of steps
+        self.tstep = 0
 
-        # State space (x[0] = 1 and x[1] = 1):
-        self.state = np.array([1, 1])
+        # Track no. of steps for undershoot (Cap at 20 steps)
+        self.track = 0
 
-        # Action space (the input - u)
-        self.action_space = Box(low=np.float32(np.array([-5])),
-                                high=np.float32(np.array([5])))
+        # Action space (either negative input, positive input or zero input)
+        self.action_space = Box(low=np.float32(np.array([-1])),
+                                high=np.float32(np.array([1])))
+
+        # State (the current value of u signal)
+        self.state = np.array([random.uniform(-5, 5)])
+        self.cpos = None
 
         # Observation space (the output y)
-        self.observation_space = Box(low=np.float32(np.array([-5])),
-                                     high=np.float(np.array([5])))
+        self.observation_space = Box(low=np.float32(np.array([-10])),
+                                     high=np.float(np.array([10])))
 
         # Set point
         self.setpoint = 0
 
         # Output matrix:
-        self.output = []
+        self.output = [0]
+
+        # Rewards:
+        self.reward = None
 
     def process(x, t, A, B, u):
         """
-        State space equation for solving.
+        State space equation for solving: ẋ = Ax + Bu
         """
         dxdt = A@x + B*u
         return dxdt
 
-    def
+    def get_val(u, x, C, D):
+        """
+        Calculate the output: y = Cx + D
+        """
+        y = C@x.T + D*u
+        return y
+
+    def step(self, action):
+        """
+        Predict the output.
+        Rewards:
+        For all steps (including termination): +1
+        For undershoot: -5
+        For opposite response: -5
+        """
+        # Assert the action is valid:
+        error_msg = f"{action} is not a valid action."
+        assert self.action_space.contains(action), error_msg
+
+        # If action valid, get our control signal
+        # Generate -ve or +ve input
+        self.cpos = action*self.state
+
+        # Get the state and output
+        x_next = odeint(self.process, self.x, self.tstep*self.step_size,
+                        args=(self.A, self.B, self.cpos, ))
+        y = self.get_val(self.cpos, self.x, self.C, self.D)
+        self.output.append(y)
+
+        # Model the problem:
+        if(self.output[self.tstep] < self.setpoint):
+            # Output goes below zero
+            done = True
+            reward = -5
+        elif(self.output[self.tstep] < self.output[self.tstep - 1] and self.track == 30):
+            # Opposite response
+            done = True
+            reward = -5
+        elif(self.tstep == self.n):
+            done = True
+            reward = 1
+        else:
+            reward = 1 + np.abs(self.output[self.tstep] - x_next[:, 1])
+
+        return reward, done, self.output, x_next
+
+    def render(self):
+        """
+        Render the environment
+        """
+        pass
+
+    def reset(self):
+        """
+        Reset the environment back to defaults
+        """
+        # Reset the state
+        self.state = np.array([random.uniform(-5, 5)])
+        self.x = np.array([0, 1])
+
+        self.tstep = 0
+        self.track = 0
+
+        self.output = [0]
+
+        return self
