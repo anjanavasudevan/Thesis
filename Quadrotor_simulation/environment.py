@@ -5,7 +5,7 @@ Author: Anjana Vasudevan
 # Importing the dependencies
 import gym
 import numpy as np
-from gym import spaces
+from gym.spaces import Box
 
 
 def linear_model(x, A, B, u):
@@ -55,11 +55,34 @@ class hover(gym.Env):
         self.C = np.hstack((self.C, np.zeros_like(self.C)))
         self.D = np.zeros((3, 4))
 
-        # Non linear model
-        self.I_xx = 0.055
-        self.I_yy = 0.055
-        self.I_zz = 0.11
-        
+        # Define action bounds (includes bias voltage to prevent motor burn)
+        self.u_min = np.float(np.array[2, 2, 2, 2])
+        self.u_max = np.float(np.array(24, 24, 24, 24))
+
+        self.action_space = Box(low=self.u_min, high=self.u_max)
+
+        # State bounds MAKE SURE ALL ARE IN RADIANS
+        # Pitch and roll are 
+        self.p_max = 37.5*np.pi/180
+        self.r_max = 37.5*np.pi/180
+        self.y_min = 0
+        self.y_max = 2*np.pi
+
+        # Maximum angular rate for all axes
+        self.ang_rate_max = 60*np.pi/180
+
+        # Specifying the observation space
+        self.x_max = np.float(np.array[self.p_max, self.r_max, self.y_max, \
+                        self.ang_rate_max, self.ang_rate_max, self.ang_rate_max])
+        self.x_min = np.float(np.array([-self.p_max, -self.r_max, self.y_min, 0, 0, 0]))
+
+        self.observation_space = Box(low=self.x_min, high=self.x_max)
+
+    def step(self, action):
+        """
+        Apply control to the motor
+        """
+        # Make sure the action is 6*6 vector
 
 
 
