@@ -12,5 +12,5 @@ Title: RL for 3DOF Quadrotor
 
 The following observations are taken into consideration:
 
-* The hover can move freely only about the yaw axes due to a slip ring. Hence range of yaw angles is assumed to be 360 degrees.
+* The hover can move freely only about the yaw axes due to a slip ring. Hence range of yaw angles is assumed to be $360 \degree$.
 * The pitch and roll axes have restricted movemement, hence the range for both these angles are set at $\pm 37.5\degree$
