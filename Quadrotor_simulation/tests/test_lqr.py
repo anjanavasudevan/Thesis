@@ -17,11 +17,14 @@ controller = LQR(env)
 
 # Test for one episode
 done = False
+step = 0
+state = env.reset()
 
 while not done:
-    state = env.reset()
     action = controller.predict(state)
     state, action, reward, next_state, done = env.step(action)
     
     if done:
         break
+    step += 1
+    print(f"Step: {step}")
