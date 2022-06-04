@@ -1,5 +1,5 @@
 """
-Gym environment for Quanser 3 DOF hover
+Gym environment for Quanser 3 DOF hover linear model
 Author: Anjana Vasudevan
 """
 # Importing the dependencies
@@ -11,7 +11,7 @@ from scipy.integrate import solve_ivp
 # Create gym class
 class hover_linear(gym.Env):
     """
-    Modelling the hover
+    Modelling the hover using the state space linear model
     """
     def __init__(self):
         super(hover_linear, self).__init__()
@@ -56,16 +56,16 @@ class hover_linear(gym.Env):
         # State bounds MAKE SURE ALL ARE IN RADIANS
         self.p_max = 37.5*np.pi/180
         self.r_max = 37.5*np.pi/180
-        self.y_min = 0
-        self.y_max = 2*np.pi
+        self.y_max = np.pi
 
         # Maximum angular rate for all axes
         self.ang_rate_max = 60*np.pi/180
 
-        # Specifying the observation space
-        self.x_max = np.array[self.p_max, self.r_max, self.y_max, \
+        # Specifying the observation space (format - [yaw, pitch, roll])
+        self.x_max = np.array[self.y_max, self.p_max, self.r_max, \
                         self.ang_rate_max, self.ang_rate_max, self.ang_rate_max]
-        self.x_min = np.array([-self.p_max, -self.r_max, self.y_min, 0, 0, 0])
+        self.x_min = np.array([-self.y_max, -self.p_max, self.r_min, 0, 0, 0])
+        self.rest = np.zeros_like(self.x_min)
 
         self.observation_space = Box(low=self.x_min, high=self.x_max)
 
@@ -109,7 +109,14 @@ class hover_linear(gym.Env):
         next_state = solution.y[:, -1]
         self.current_timestep += 1
 
-        # Calculate the rewards
+        # Convert the angles in [-pi, pi] range
+        for angle in self.state[:3]:
+            if angle < -np.pi:
+                angle += 2*np.pi
+            if angle > np.pi:
+                angle -= 2*np.pi
+
+        # Calculate the rewards - Note: resulting reward is numpy.float64 datatype
         rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@self.u)
 
         # Check for doneness
@@ -124,7 +131,7 @@ class hover_linear(gym.Env):
         """
         Reset to default parameters
         """
-        self.state = self.x_min
+        self.state = self.rest
         self.current_time = 0
         self.current_timestep = 0
 
