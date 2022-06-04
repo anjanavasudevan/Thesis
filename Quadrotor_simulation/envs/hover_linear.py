@@ -96,14 +96,17 @@ class hover_linear(gym.Env):
         self.current_time = self.current_timestep*self.step_interval
         time_range = (self.current_time, self.current_time+self.step_interval)
 
-        # Split the action vector:
-        u1, u2, u3, u4 = self.action
-
+        # Split the action vector - we ensure that episode does not terminate at the first step:
+        if (self.current_timestep == 0):
+            u1, u2, u3, u4 = self.action
+        else:
+            u1, u2, u3, u4 = action
+        
         # Calculate the next step
         solution = solve_ivp(self.linear_model, time_range, self.state, args=(u1, u2, u3, u4))
 
         # Get the next state
-        self.next_state = solution.y[:, -1]
+        next_state = solution.y[:, -1]
         self.current_timestep += 1
 
         # Calculate the rewards
@@ -115,8 +118,18 @@ class hover_linear(gym.Env):
                 or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
 
         # Return all the observations
-        return self.state, self.action, rewards, self.next_state, done
-        
+        return self.state, self.action, rewards, next_state, done
+
+    def reset(self):
+        """
+        Reset to default parameters
+        """
+        self.state = self.x_min
+        self.current_time = 0
+        self.current_timestep = 0
+
+        return self.state
+
     def linear_model(self, t, x, u1=2, u2=2, u3=2, u4=2):
         """
         Evaluate using state space representation
