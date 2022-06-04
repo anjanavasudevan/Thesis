@@ -54,7 +54,6 @@ class hover(gym.Env):
         self.action_space = Box(low=self.u_min, high=self.u_max)
 
         # State bounds MAKE SURE ALL ARE IN RADIANS
-        # Pitch and roll are 
         self.p_max = 37.5*np.pi/180
         self.r_max = 37.5*np.pi/180
         self.y_min = 0
@@ -98,10 +97,14 @@ class hover(gym.Env):
         # Calculate the next step
         solution = solve_ivp(self.linear_model, time_range, self.state, args=(u1, u2, u3, u4))
 
-        # 
+        # Get the next state
+        self.next_state = solution.y[:, -1]
+
+        # Increment the timesteps
+        
 
         # Calculate the next time
-    def linear_model(t, x, u1=2, u2=2, u3=2, u4=2):
+    def linear_model(self, t, x, u1=2, u2=2, u3=2, u4=2):
         """
         Evaluate using state space representation
         """
