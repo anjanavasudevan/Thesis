@@ -30,8 +30,8 @@ class hover_linear(gym.Env):
         self.Kt = 0.0036
 
         # Motor torque related
-        self.Jeq_prop = self.Jm + self.m_prop*(self.L**2)
         self.Jm = 1.91e-6
+        self.Jeq_prop = self.Jm + self.m_prop*(self.L**2)
 
         # ii. Equivalent Moment of Inertia about each Axis (kg.m^2)
         self.Jp = 2*self.Jeq_prop
@@ -50,8 +50,8 @@ class hover_linear(gym.Env):
         self.D = np.zeros((3, 4))
 
         # Define action bounds (includes bias voltage to prevent motor burn)
-        self.u_min = np.array[2, 2, 2, 2]
-        self.u_max = np.array(24, 24, 24, 24)
+        self.u_min = np.array([2, 2, 2, 2])
+        self.u_max = np.array([24, 24, 24, 24])
 
         self.action_space = Box(low=self.u_min, high=self.u_max)
 
@@ -64,9 +64,9 @@ class hover_linear(gym.Env):
         self.ang_rate_max = 60*np.pi/180
 
         # Specifying the observation space (format - [yaw, pitch, roll])
-        self.x_max = np.array[self.y_max, self.p_max, self.r_max, \
-                        self.ang_rate_max, self.ang_rate_max, self.ang_rate_max]
-        self.x_min = np.array([-self.y_max, -self.p_max, self.r_min, 0, 0, 0])
+        self.x_max = np.array([self.y_max, self.p_max, self.r_max, \
+                        self.ang_rate_max, self.ang_rate_max, self.ang_rate_max])
+        self.x_min = np.array([-self.y_max, -self.p_max, -self.r_max, 0, 0, 0])
         self.rest = np.zeros_like(self.x_min)
 
         self.observation_space = Box(low=self.x_min, high=self.x_max)
@@ -109,7 +109,6 @@ class hover_linear(gym.Env):
 
         # Get the next state
         next_state = solution.y[:, -1]
-        self.current_timestep += 1
 
         # Convert the angles in [-pi, pi] range
         for angle in self.state[:3]:
@@ -119,12 +118,18 @@ class hover_linear(gym.Env):
                 angle -= 2*np.pi
 
         # Calculate the rewards - Note: resulting reward is numpy.float64 datatype
-        rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@self.u)
+        if (self.current_timestep == 0):
+            rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@self.action)
+        else:
+            rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@action)
+        
 
         # Check for doneness
         done = np.any(self.action < self.u_min) or np.any(self.action > self.u_max)\
                 or np.any(self.state[3:] >= self.x_max[3:]) or np.any(self.state[:2] >= self.x_max[:2])\
                 or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
+        
+        self.current_timestep += 1
 
         # Return all the observations
         return self.state, self.action, rewards, next_state, done

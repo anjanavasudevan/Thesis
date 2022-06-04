@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, 'D:\IITH_AI_Docs\Thesis\Thesis-work\Thesis\Quadrotor_simulation')
 from envs.hover_linear import hover_linear
-from controller.lqr import LQR
+from controllers.lqr import LQR
 import numpy as np
 import control
 from scipy.integrate import solve_ivp
@@ -15,3 +15,13 @@ from scipy.integrate import solve_ivp
 env = hover_linear()
 controller = LQR(env)
 
+# Test for one episode
+done = False
+
+while not done:
+    state = env.reset()
+    action = controller.predict(state)
+    state, action, reward, next_state, done = env.step(action)
+    
+    if done:
+        break
