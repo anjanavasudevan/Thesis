@@ -2,7 +2,8 @@
 LQR controller for the hover environment
 Author: Anjana Vasudevan
 """
-
+import os
+import sys
 import control
 import numpy as np
 

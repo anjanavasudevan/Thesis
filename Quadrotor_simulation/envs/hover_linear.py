@@ -3,6 +3,8 @@ Gym environment for Quanser 3 DOF hover linear model
 Author: Anjana Vasudevan
 """
 # Importing the dependencies
+import os
+import sys
 import gym
 import numpy as np
 from gym.spaces import Box
