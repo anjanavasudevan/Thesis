@@ -9,12 +9,12 @@ from gym.spaces import Box
 from scipy.integrate import solve_ivp
 
 # Create gym class
-class hover(gym.Env):
+class hover_linear(gym.Env):
     """
     Modelling the hover
     """
     def __init__(self):
-        super(hover, self).__init__()
+        super(hover_linear, self).__init__()
         # Hover body details
         self.m = 2.85
         self.m_prop = self.m / 4
@@ -80,6 +80,11 @@ class hover(gym.Env):
         self.state = np.array([0, 0, 0, 0, 0, 0])
         self.action = np.array([2, 2, 2, 2])
 
+        # Reward function paramters
+        self.Q = np.array([[500, 0, 0, 0, 0, 0], [0, 350, 0, 0, 0, 0], [0, 0, 350, 0, 0, 0],\
+                    [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 20, 0], [0, 0, 0, 0, 0, 20]])
+        self.R = np.eye(4)*0.01
+
     def step(self, action):
         """
         Apply control to the motor
@@ -99,11 +104,19 @@ class hover(gym.Env):
 
         # Get the next state
         self.next_state = solution.y[:, -1]
+        self.current_timestep += 1
 
-        # Increment the timesteps
+        # Calculate the rewards
+        rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@self.u)
+
+        # Check for doneness
+        done = np.any(self.action < self.u_min) or np.any(self.action > self.u_max)\
+                or np.any(self.state[3:] >= self.x_max[3:]) or np.any(self.state[:2] >= self.x_max[:2])\
+                or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
+
+        # Return all the observations
+        return self.state, self.action, rewards, self.next_state, done
         
-
-        # Calculate the next time
     def linear_model(self, t, x, u1=2, u2=2, u3=2, u4=2):
         """
         Evaluate using state space representation
