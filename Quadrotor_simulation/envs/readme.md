@@ -30,3 +30,8 @@ The episode is terminated if one of the following conditions occur:
 1. The pitch and roll angles go beyond range.
 2. The motor voltages fall below specified voltage levels
 3. The timestep for simulation runs out
+
+## Environment specifications
+|Parameter|Min. Value|Max. Value|
+|---------|----------|----------|
+|Pitch angle|-37.5&deg|37.5&deg|
