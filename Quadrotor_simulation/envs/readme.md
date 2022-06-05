@@ -32,6 +32,7 @@ The episode is terminated if one of the following conditions occur:
 3. The timestep for simulation runs out
 
 ## Environment specifications
+
 |Parameter|Min. Value|Max. Value|
 |---------|----------|----------|
 |Pitch angle|-37.5&deg;|37.5&deg;|
