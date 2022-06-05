@@ -67,7 +67,7 @@ class hover_linear(gym.Env):
         self.x_max = np.array([self.y_max, self.p_max, self.r_max, \
                         self.ang_rate_max, self.ang_rate_max, self.ang_rate_max])
         self.x_min = np.array([-self.y_max, -self.p_max, -self.r_max, 0, 0, 0])
-        self.rest = np.zeros_like(self.x_min)
+        # self.rest = np.zeros_like(self.x_min)
 
         self.observation_space = Box(low=self.x_min, high=self.x_max)
 
@@ -79,13 +79,17 @@ class hover_linear(gym.Env):
         self.step_interval = 0.02
 
         # Initial State-action
-        self.state = np.array([0, 0, 0, 0, 0, 0])
+        self.state = None
         self.action = np.array([2, 2, 2, 2])
 
         # Reward function paramters
         self.Q = np.array([[500, 0, 0, 0, 0, 0], [0, 350, 0, 0, 0, 0], [0, 0, 350, 0, 0, 0],\
                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 20, 0], [0, 0, 0, 0, 0, 20]])
         self.R = np.eye(4)*0.01
+
+        # Initialize seed
+        self.seed = 0
+        self.random_state = np.random.default_rng(self.seed)
 
     def step(self, action):
         """
@@ -99,10 +103,8 @@ class hover_linear(gym.Env):
         time_range = (self.current_time, self.current_time+self.step_interval)
 
         # Split the action vector - we ensure that episode does not terminate at the first step:
-        if (self.current_timestep == 0):
-            u1, u2, u3, u4 = self.action
-        else:
-            u1, u2, u3, u4 = action
+
+        u1, u2, u3, u4 = action
         
         # Calculate the next step
         solution = solve_ivp(self.linear_model, time_range, self.state, args=(u1, u2, u3, u4))
@@ -118,10 +120,7 @@ class hover_linear(gym.Env):
                 angle -= 2*np.pi
 
         # Calculate the rewards - Note: resulting reward is numpy.float64 datatype
-        if (self.current_timestep == 0):
-            rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@self.action)
-        else:
-            rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@action)
+        rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@action)
         
 
         # Check for doneness
@@ -130,15 +129,16 @@ class hover_linear(gym.Env):
                 or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
         
         self.current_timestep += 1
+        self.state = next_state
 
         # Return all the observations
-        return self.state, self.action, rewards, next_state, done
+        return next_state, self.action, rewards, done
 
     def reset(self):
         """
         Reset to default parameters
         """
-        self.state = self.rest
+        self.state = self.random_state.uniform(low=self.x_min, high=self.x_max)
         self.current_time = 0
         self.current_timestep = 0
 

@@ -10,6 +10,7 @@ from controllers.lqr import LQR
 import numpy as np
 import control
 from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
 
 # Create gym environment
 env = hover_linear()
@@ -19,12 +20,17 @@ controller = LQR(env)
 done = False
 step = 0
 state = env.reset()
+states = []
+
 
 while not done:
     action = controller.predict(state)
-    state, action, reward, next_state, done = env.step(action)
+    next_state, action, reward, done = env.step(action)
     
+    states.append(state)
     if done:
         break
     step += 1
     print(f"Step: {step}")
+
+print(states)
