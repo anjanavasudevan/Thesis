@@ -1,6 +1,4 @@
----
-Title: RL for 3DOF Quadrotor
----
+# Designing environment for 3DOF Quadrotor
 
 ## Naming conventions
 
