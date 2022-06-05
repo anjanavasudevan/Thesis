@@ -31,6 +31,7 @@ while not done:
     if done:
         break
     step += 1
+    state = next_state
     print(f"Step: {step}, State: {state}")
 
 

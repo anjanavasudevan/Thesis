@@ -132,7 +132,7 @@ class hover_linear(gym.Env):
         self.state = next_state
 
         # Return all the observations
-        return next_state, self.action, rewards, done
+        return next_state, action, rewards, done
 
     def reset(self):
         """
