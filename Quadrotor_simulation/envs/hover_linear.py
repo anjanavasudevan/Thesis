@@ -124,8 +124,7 @@ class hover_linear(gym.Env):
         
 
         # Check for doneness
-        done = np.any(self.action < self.u_min) or np.any(self.action > self.u_max)\
-                or np.any(self.state[3:] >= self.x_max[3:]) or np.any(self.state[:2] >= self.x_max[:2])\
+        done = np.any(self.state[3:] >= self.x_max[3:]) or np.any(self.state[:2] >= self.x_max[:2])\
                 or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
         
         self.current_timestep += 1
