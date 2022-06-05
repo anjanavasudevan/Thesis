@@ -89,7 +89,7 @@ class hover_linear(gym.Env):
 
         # Initialize seed
         self.seed = 0
-        self.random_state = np.random.default_rng(self.seed)
+        self.random_state = np.random.default_rng()
 
     def step(self, action):
         """
