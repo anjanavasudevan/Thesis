@@ -20,7 +20,7 @@ The following observations are taken into consideration:
 The rewards are calculated using LQR control policy. We minimize the rewards as:
 
 $$
-\int_{0}^{\infty} x^TQx + u^TRu \,dt  \\
+\int_{0}^{\infty} x^TQx + u^TRu dt  \\
 $$
 
 RL environments by default maximise rewards, hence we calculate the negative reward.
