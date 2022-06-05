@@ -31,6 +31,7 @@ while not done:
     if done:
         break
     step += 1
-    print(f"Step: {step}")
+    print(f"Step: {step}, State: {state}")
 
-print(states)
+
+
