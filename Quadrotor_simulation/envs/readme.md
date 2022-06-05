@@ -35,3 +35,7 @@ The episode is terminated if one of the following conditions occur:
 |Parameter|Min. Value|Max. Value|
 |---------|----------|----------|
 |Pitch angle|-37.5&deg;|37.5&deg;|
+|Yaw angle|0&deg;|0&deg;|
+|Roll angle|-37.5&deg;|37.5&deg;|
+|Angular rates|0&deg;/s|60&deg;/s|
+|Voltage applied to the motors|2 V| 24V|
