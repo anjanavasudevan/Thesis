@@ -103,8 +103,14 @@ class hover_linear(gym.Env):
         time_range = (self.current_time, self.current_time+self.step_interval)
 
         # Split the action vector - we ensure that episode does not terminate at the first step:
-
         u1, u2, u3, u4 = action
+
+        # Convert the angles in [-pi, pi] range
+        for i, angle in enumerate(self.state[:3]):
+            if angle < -np.pi:
+                self.state[i] += 2*np.pi
+            if angle > np.pi:
+                self.state[i] -= 2*np.pi
         
         # Calculate the next step
         solution = solve_ivp(self.linear_model, time_range, self.state, args=(u1, u2, u3, u4))
@@ -112,20 +118,13 @@ class hover_linear(gym.Env):
         # Get the next state
         next_state = solution.y[:, -1]
 
-        # Convert the angles in [-pi, pi] range
-        for angle in self.state[:3]:
-            if angle < -np.pi:
-                angle += 2*np.pi
-            if angle > np.pi:
-                angle -= 2*np.pi
-
         # Calculate the rewards - Note: resulting reward is numpy.float64 datatype
         rewards = -(self.state.T@self.Q@self.state + self.action.T@self.R@action)
         
 
         # Check for doneness
         done = np.any(self.state[3:] > self.x_max[3:]) or np.any(self.state[:2] > self.x_max[:2])\
-                or np.any(self.state[:2] < self.x_min[:2]) or self.current_time > self.tmax
+                or np.any(self.state[:2] < self.x_min[:2]) or self.current_time >= self.tmax
         
         self.current_timestep += 1
         self.state = next_state

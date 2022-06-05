@@ -29,8 +29,10 @@ class LQR:
 
         assert self.K.shape[1] == obs.shape[0], "Please check the dimensions of the observation"
 
-        action = self.K@obs
-
+        action = -self.K@obs
+        
+        # Convert all the values to +ve to prevent errors
+        action = np.absolute(action)
         # Clip the action
         action = np.clip(action, a_min=2, a_max=24)
         return action

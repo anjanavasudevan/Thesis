@@ -29,11 +29,10 @@ while not done:
     
     states.append(state)
     if done:
+        print(f"State: {state}, Action: {action}, Reward: {reward}, Step: {step}")
         break
     step += 1
     state = next_state
-    print(f"Step: {step}, State: {state}")
-
-
+    #print(f"Step: {step}, State: {state}, Action: {action}, Reward: {reward}")
 
 
