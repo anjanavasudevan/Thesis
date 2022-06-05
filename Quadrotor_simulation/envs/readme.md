@@ -34,4 +34,4 @@ The episode is terminated if one of the following conditions occur:
 ## Environment specifications
 |Parameter|Min. Value|Max. Value|
 |---------|----------|----------|
-|Pitch angle|-37.5&deg|37.5&deg|
+|Pitch angle|-37.5&deg;|37.5&deg;|
