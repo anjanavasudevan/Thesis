@@ -7,7 +7,6 @@ import sys
 
 sys.path.insert(0, 'D:\IITH_AI_Docs\Thesis\Thesis-work\Thesis\Quadrotor_simulation')
 from envs.hover_linear_modified import hover_linear_modified
-from controllers.lqr import LQR
 import numpy as np
 import control
 from scipy.integrate import solve_ivp
