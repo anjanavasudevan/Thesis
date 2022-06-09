@@ -78,9 +78,37 @@ class hover_state_space(gym.Env):
         # Costs
         self.R = np.eye(4)*0.01
 
+        # Time step
+        self.dt = 0.02
 
     def step(self, action):
-        pass
+        """
+        Apply control to the motor
+        """
+        assert action.shape == self.action_space.shape, "Check the dimensions of input action"
+
+        # Convert the angles in [-pi, pi] range
+        for idx in (0, 2, 4):
+            if self.state[idx] < -np.pi:
+                self.state[idx] += 2*np.pi
+            if self.state[idx] > np.pi:
+                self.state[idx] -= 2*np.pi
+
+        # Get next state using Euler's method
+        dxdt = self.A@self.state + self.B@action
+        new_state = self.state + dxdt*self.dt
+
+        # Calculate the rewards
+        reward = -(self.state.T@Q@self.state + action.T@R@action)
+        self.state = new_state
+
+        return new_state, reward, False
 
     def reset(self):
-        pass
+        """
+        Reset the environment defaults
+        """
+        self.state = self.random_state.uniform(low=self.x_min, high=self.x_max)
+        return self.state
+
+    
