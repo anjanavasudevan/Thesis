@@ -16,6 +16,7 @@ class hover_state_space(gym.Env):
         """
         Initialize hover environment
         """
+        super(hover_linear_modified, self).__init__()
         # Physical parameters of the hover
         self.m = 2.85
         self.m_prop = self.m / 4
