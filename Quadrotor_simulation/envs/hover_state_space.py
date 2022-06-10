@@ -16,7 +16,7 @@ class hover_state_space(gym.Env):
         """
         Initialize hover environment
         """
-        super(hover_linear_modified, self).__init__()
+        super(hover_state_space, self).__init__()
         # Physical parameters of the hover
         self.m = 2.85
         self.m_prop = self.m / 4
@@ -59,7 +59,7 @@ class hover_state_space(gym.Env):
         # Specifying the observation space (format - [yaw, pitch, roll])
         self.x_max = np.array([self.y_max, self.ang_rate_max, self.p_max, \
                         self.ang_rate_max, self.r_max, self.ang_rate_max])
-        self.x_min = np.array([-self.y_max, 0, -self.p_max, 0, -self.r_max])
+        self.x_min = np.array([-self.y_max, 0, -self.p_max, 0, -self.r_max, 0])
         # self.rest = np.zeros_like(self.x_min)
 
         self.observation_space = Box(low=self.x_min, high=self.x_max)
@@ -100,7 +100,7 @@ class hover_state_space(gym.Env):
         new_state = self.state + dxdt*self.dt
 
         # Calculate the rewards
-        reward = -(self.state.T@Q@self.state + action.T@R@action)
+        reward = -(self.state.T@self.Q@self.state + action.T@self.R@action)
         self.state = new_state
 
         return new_state, reward, False
