@@ -15,8 +15,9 @@ class LQR:
         self.env = env
         self.A = env.A
         self.B = env.B
-        self.Q = env.Q
-        self.R = env.R
+        self.Q = np.array([[500, 0, 0, 0, 0, 0], [0, 350, 0, 0, 0, 0], [0, 0, 350, 0, 0, 0],\
+                    [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 20, 0], [0, 0, 0, 0, 0, 20]])
+        self.R = np.eye(4)*0.01
 
         # Get the optimal feedback law
         self.K, self.S, _ = control.lqr(self.A, self.B, self.Q, self.R)
