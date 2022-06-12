@@ -57,9 +57,9 @@ class hover_state_space(gym.Env):
         self.ang_rate_max = 60*np.pi/180
 
         # Specifying the observation space (format - [yaw, pitch, roll])
-        self.x_max = np.array([self.y_max, self.ang_rate_max, self.p_max, \
-                        self.ang_rate_max, self.r_max, self.ang_rate_max])
-        self.x_min = np.array([-self.y_max, 0, -self.p_max, 0, -self.r_max, 0])
+        self.x_max = np.array([self.y_max, self.p_max, self.r_max, \
+                        self.ang_rate_max, self.ang_rate_max, self.ang_rate_max])
+        self.x_min = np.array([-self.y_max, -self.p_max, -self.r_max, 0, 0, 0])
         # self.rest = np.zeros_like(self.x_min)
 
         self.observation_space = Box(low=self.x_min, high=self.x_max)
@@ -80,7 +80,7 @@ class hover_state_space(gym.Env):
         self.R = np.eye(4)*0.01
 
         # Time step
-        self.dt = 0.02
+        self.dt = 0.025
 
     def step(self, action):
         """
@@ -89,7 +89,7 @@ class hover_state_space(gym.Env):
         assert action.shape == self.action_space.shape, "Check the dimensions of input action"
 
         # Convert the angles in [-pi, pi] range
-        for idx in (0, 2, 4):
+        for idx in range(3):
             if self.state[idx] < -np.pi:
                 self.state[idx] += 2*np.pi
             if self.state[idx] > np.pi:
@@ -102,6 +102,9 @@ class hover_state_space(gym.Env):
         # Calculate the rewards
         reward = -(self.state.T@self.Q@self.state + action.T@self.R@action)
         self.state = new_state
+
+        done = np.any(self.state[3:] > self.x_max[3:]) or np.any(self.state[:2] > self.x_max[:2])\
+                or np.any(self.state[:2] < self.x_min[:2])
 
         return new_state, reward, False
 

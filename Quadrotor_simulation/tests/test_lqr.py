@@ -21,6 +21,7 @@ done = False
 step = 0
 state = env.reset()
 states = []
+done = False
 
 
 for step in range(1000):
@@ -31,13 +32,12 @@ for step in range(1000):
     if done:
         print(f"State: {state}, Action: {action}, Reward: {reward}, Step: {step}")
         break
-    step += 1
     state = next_state
     #print(f"Step: {step}, State: {state}, Action: {action}, Reward: {reward}")
 
 states = np.array(states)
 t = np.arange(states.shape[0])
 plt.plot(t, states[:, 0])
+plt.plot(t, states[:, 1])
 plt.plot(t, states[:, 2])
-plt.plot(t, states[:, 4])
 plt.show()
